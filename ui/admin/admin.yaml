@@ -1,0 +1,357 @@
+about:
+  date: January 28, 2025 13:38:21
+  recent_changes: works with modified safrs-react-admin
+  version: 0.0.0
+api_root: '{http_type}://{swagger_host}:{port}/{api}'
+authentication: '{system-default}'
+info:
+  number_relationships: 15
+  number_tables: 12
+info_toggle_checked: true
+resources:
+  Activity:
+    attributes:
+    - label: ' description*'
+      name: description
+      search: true
+      sort: true
+    - name: user_id
+    - name: id
+    description: User activity records.
+    info_list: User activity records.
+    tab_groups:
+    - direction: toone
+      fks:
+      - user_id
+      name: user
+      resource: User
+    type: Activity
+    user_key: description
+  Comment:
+    attributes:
+    - label: ' id*'
+      name: id
+      search: true
+      sort: true
+    - name: post_id
+    - name: user_id
+    - name: content
+    description: Comments made by users on posts.
+    info_list: Comments made by users on posts.
+    tab_groups:
+    - direction: toone
+      fks:
+      - post_id
+      name: post
+      resource: Post
+    - direction: toone
+      fks:
+      - user_id
+      name: user
+      resource: User
+    type: Comment
+    user_key: id
+  Follow:
+    attributes:
+    - label: ' id*'
+      name: id
+      search: true
+      sort: true
+    - name: followee_id
+    - name: follower_id
+    description: Defines the follow relationship between users.
+    info_list: Defines the follow relationship between users.
+    tab_groups:
+    - direction: toone
+      fks:
+      - followee_id
+      name: followee
+      resource: User
+    - direction: toone
+      fks:
+      - follower_id
+      name: follower
+      resource: User
+    type: Follow
+    user_key: id
+  Like:
+    attributes:
+    - label: ' id*'
+      name: id
+      search: true
+      sort: true
+    - name: post_id
+    - name: user_id
+    description: Likes made by users on posts.
+    info_list: Likes made by users on posts.
+    tab_groups:
+    - direction: toone
+      fks:
+      - post_id
+      name: post
+      resource: Post
+    - direction: toone
+      fks:
+      - user_id
+      name: user
+      resource: User
+    type: Like
+    user_key: id
+  Log:
+    attributes:
+    - label: ' id*'
+      name: id
+      search: true
+      sort: true
+    - name: entry
+    - name: created_at
+      type: DATETIME
+    description: Log of system activities.
+    info_list: Log of system activities.
+    type: Log
+    user_key: id
+  Message:
+    attributes:
+    - label: ' id*'
+      name: id
+      search: true
+      sort: true
+    - name: receiver_id
+    - name: sender_id
+    - name: content
+    description: Messages exchanged between users.
+    info_list: Messages exchanged between users.
+    tab_groups:
+    - direction: toone
+      fks:
+      - receiver_id
+      name: receiver
+      resource: User
+    - direction: toone
+      fks:
+      - sender_id
+      name: sender
+      resource: User
+    type: Message
+    user_key: id
+  Notification:
+    attributes:
+    - label: ' id*'
+      name: id
+      search: true
+      sort: true
+    - name: user_id
+    - name: content
+    description: Notifications sent to users.
+    info_list: Notifications sent to users.
+    tab_groups:
+    - direction: toone
+      fks:
+      - user_id
+      name: user
+      resource: User
+    type: Notification
+    user_key: id
+  Post:
+    attributes:
+    - label: ' id*'
+      name: id
+      search: true
+      sort: true
+    - name: user_id
+    - name: title
+    - name: content
+    description: Details about user posts made on the platform.
+    info_list: Details about user posts made on the platform.
+    tab_groups:
+    - direction: tomany
+      fks:
+      - post_id
+      name: CommentList
+      resource: Comment
+    - direction: tomany
+      fks:
+      - post_id
+      name: LikeList
+      resource: Like
+    - direction: tomany
+      fks:
+      - post_id
+      name: PostTagList
+      resource: PostTag
+    - direction: toone
+      fks:
+      - user_id
+      name: user
+      resource: User
+    type: Post
+    user_key: id
+  PostTag:
+    attributes:
+    - label: ' id*'
+      name: id
+      search: true
+      sort: true
+    - name: post_id
+    - name: tag_id
+    description: Associative entity for the post-to-tag relationship.
+    info_list: Associative entity for the post-to-tag relationship.
+    tab_groups:
+    - direction: toone
+      fks:
+      - post_id
+      name: post
+      resource: Post
+    - direction: toone
+      fks:
+      - tag_id
+      name: tag
+      resource: Tag
+    type: PostTag
+    user_key: id
+  Profile:
+    attributes:
+    - label: ' first_name*'
+      name: first_name
+      search: true
+      sort: true
+    - name: user_id
+    - name: last_name
+    - name: bio
+    - name: id
+    description: Profile details of the user including their biography.
+    info_list: Profile details of the user including their biography.
+    tab_groups:
+    - direction: tomany
+      fks:
+      - profile_id
+      name: UserList
+      resource: User
+    - direction: toone
+      fks:
+      - user_id
+      name: user
+      resource: User
+    type: Profile
+    user_key: first_name
+  Tag:
+    attributes:
+    - label: ' name*'
+      name: name
+      search: true
+      sort: true
+    - name: id
+    description: Tags associated with posts.
+    info_list: Tags associated with posts.
+    tab_groups:
+    - direction: tomany
+      fks:
+      - tag_id
+      name: PostTagList
+      resource: PostTag
+    type: Tag
+    user_key: name
+  User:
+    attributes:
+    - label: ' username*'
+      name: username
+      required: true
+      search: true
+      sort: true
+    - name: profile_id
+    - name: email
+      required: true
+    - name: id
+    - name: password
+      required: true
+    description: User information and authentication details.
+    info_list: User information and authentication details.
+    tab_groups:
+    - direction: tomany
+      fks:
+      - user_id
+      name: ActivityList
+      resource: Activity
+    - direction: tomany
+      fks:
+      - user_id
+      name: CommentList
+      resource: Comment
+    - direction: tomany
+      fks:
+      - followee_id
+      name: FollowList
+      resource: Follow
+    - direction: tomany
+      fks:
+      - follower_id
+      name: followerFollowList
+      resource: Follow
+    - direction: tomany
+      fks:
+      - user_id
+      name: LikeList
+      resource: Like
+    - direction: tomany
+      fks:
+      - receiver_id
+      name: MessageList
+      resource: Message
+    - direction: tomany
+      fks:
+      - sender_id
+      name: senderMessageList
+      resource: Message
+    - direction: tomany
+      fks:
+      - user_id
+      name: NotificationList
+      resource: Notification
+    - direction: tomany
+      fks:
+      - user_id
+      name: PostList
+      resource: Post
+    - direction: tomany
+      fks:
+      - user_id
+      name: ProfileList
+      resource: Profile
+    - direction: toone
+      fks:
+      - profile_id
+      name: profile
+      resource: Profile
+    type: User
+    user_key: username
+settings:
+  HomeJS: /admin-app/home.js
+  max_list_columns: 8
+  style_guide:
+    applicationLocales:
+    - en
+    - es
+    currency_symbol: $
+    currency_symbol_position: left
+    date_format: LL
+    decimal_max: '1000000000'
+    decimal_min: '0'
+    decimal_separator: .
+    detail_mode: tab
+    edit_on_mode: dblclick
+    exclude_listpicker: false
+    include_translation: 'false'
+    keycloak_client_id: alsclient
+    keycloak_realm: kcals
+    keycloak_url: http://localhost:8080
+    locale: en
+    max_decimal_digits: '4'
+    min_decimal_digits: '2'
+    new_mode: dialog
+    pick_style: list
+    row_height: small,
+    serviceType: OntimizeEE
+    startSessionPath: /auth/login
+    style: light
+    thousand_separator: ','
+    use_keycloak: 'false'

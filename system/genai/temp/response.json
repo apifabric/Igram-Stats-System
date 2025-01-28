@@ -1,0 +1,135 @@
+{
+    "models": [
+        {
+            "classname": "User",
+            "code": "class User(Base):\n    __tablename__ = 'user'\n\n    id = Column(Integer, primary_key=True, autoincrement=True)\n    username = Column(String, nullable=False)\n    email = Column(String, nullable=False)\n    password = Column(String, nullable=False)\n    profile_id = Column(Integer, ForeignKey('profile.id'))",
+            "description": "User information and authentication details.",
+            "name": "User"
+        },
+        {
+            "classname": "Profile",
+            "code": "class Profile(Base):\n    __tablename__ = 'profile'\n\n    id = Column(Integer, primary_key=True, autoincrement=True)\n    first_name = Column(String)\n    last_name = Column(String)\n    bio = Column(Text)\n    user_id = Column(Integer, ForeignKey('user.id'))",
+            "description": "Profile details of the user including their biography.",
+            "name": "Profile"
+        },
+        {
+            "classname": "Post",
+            "code": "class Post(Base):\n    __tablename__ = 'post'\n\n    id = Column(Integer, primary_key=True, autoincrement=True)\n    title = Column(String)\n    content = Column(Text)\n    user_id = Column(Integer, ForeignKey('user.id'))",
+            "description": "Details about user posts made on the platform.",
+            "name": "Post"
+        },
+        {
+            "classname": "Comment",
+            "code": "class Comment(Base):\n    __tablename__ = 'comment'\n\n    id = Column(Integer, primary_key=True, autoincrement=True)\n    content = Column(Text)\n    post_id = Column(Integer, ForeignKey('post.id'))\n    user_id = Column(Integer, ForeignKey('user.id'))",
+            "description": "Comments made by users on posts.",
+            "name": "Comment"
+        },
+        {
+            "classname": "Like",
+            "code": "class Like(Base):\n    __tablename__ = 'like'\n\n    id = Column(Integer, primary_key=True, autoincrement=True)\n    post_id = Column(Integer, ForeignKey('post.id'))\n    user_id = Column(Integer, ForeignKey('user.id'))",
+            "description": "Likes made by users on posts.",
+            "name": "Like"
+        },
+        {
+            "classname": "Follow",
+            "code": "class Follow(Base):\n    __tablename__ = 'follow'\n\n    id = Column(Integer, primary_key=True, autoincrement=True)\n    follower_id = Column(Integer, ForeignKey('user.id'))\n    followee_id = Column(Integer, ForeignKey('user.id'))",
+            "description": "Defines the follow relationship between users.",
+            "name": "Follow"
+        },
+        {
+            "classname": "Tag",
+            "code": "class Tag(Base):\n    __tablename__ = 'tag'\n\n    id = Column(Integer, primary_key=True, autoincrement=True)\n    name = Column(String)",
+            "description": "Tags associated with posts.",
+            "name": "Tag"
+        },
+        {
+            "classname": "PostTag",
+            "code": "class PostTag(Base):\n    __tablename__ = 'post_tag'\n\n    id = Column(Integer, primary_key=True, autoincrement=True)\n    post_id = Column(Integer, ForeignKey('post.id'))\n    tag_id = Column(Integer, ForeignKey('tag.id'))",
+            "description": "Associative entity for the post-to-tag relationship.",
+            "name": "PostTag"
+        },
+        {
+            "classname": "Message",
+            "code": "class Message(Base):\n    __tablename__ = 'message'\n\n    id = Column(Integer, primary_key=True, autoincrement=True)\n    content = Column(Text)\n    sender_id = Column(Integer, ForeignKey('user.id'))\n    receiver_id = Column(Integer, ForeignKey('user.id'))",
+            "description": "Messages exchanged between users.",
+            "name": "Message"
+        },
+        {
+            "classname": "Notification",
+            "code": "class Notification(Base):\n    __tablename__ = 'notification'\n\n    id = Column(Integer, primary_key=True, autoincrement=True)\n    content = Column(Text)\n    user_id = Column(Integer, ForeignKey('user.id'))",
+            "description": "Notifications sent to users.",
+            "name": "Notification"
+        },
+        {
+            "classname": "Log",
+            "code": "class Log(Base):\n    __tablename__ = 'log'\n\n    id = Column(Integer, primary_key=True, autoincrement=True)\n    entry = Column(Text)\n    created_at = Column(DateTime, default=datetime.utcnow)",
+            "description": "Log of system activities.",
+            "name": "Log"
+        },
+        {
+            "classname": "Activity",
+            "code": "class Activity(Base):\n    __tablename__ = 'activity'\n\n    id = Column(Integer, primary_key=True, autoincrement=True)\n    description = Column(Text)\n    user_id = Column(Integer, ForeignKey('user.id'))",
+            "description": "User activity records.",
+            "name": "Activity"
+        }
+    ],
+    "rules": [
+        {
+            "name": "User Password Constraint",
+            "description": "Ensure the user password is set and not empty.",
+            "use_case": "General",
+            "entity": "User",
+            "code": "Rule.constraint(validate=User,\n                as_condition=lambda row: row.password != '',\n                error_msg='Password must be set and non-empty')"
+        },
+        {
+            "name": "Profile-User Link Constraint",
+            "description": "Ensure there is a user associated with each profile entry.",
+            "use_case": "General",
+            "entity": "Profile",
+            "code": "Rule.constraint(validate=Profile,\n                as_condition=lambda row: row.user_id is not None,\n                error_msg='Each profile must be linked to a user')"
+        },
+        {
+            "name": "Post Likes Count",
+            "description": "Track the number of likes for each post.",
+            "use_case": "General",
+            "entity": "Post",
+            "code": "Rule.count(derive=Post.likes_count, as_count_of=Like)"
+        },
+        {
+            "name": "Comment User Constraint",
+            "description": "Ensure each comment must be associated with a user.",
+            "use_case": "General",
+            "entity": "Comment",
+            "code": "Rule.constraint(validate=Comment,\n    as_condition=lambda row: row.user_id is not None,\n    error_msg='A comment must be associated with a user')"
+        }
+    ],
+    "test_data": "test users, posts, and profiles",
+    "test_data_rows": [
+        {
+            "test_data_row_variable": "user1",
+            "code": "user1 = User(username=\"user_one\", email=\"user1@example.com\", password=\"hashed_pw1\")"
+        },
+        {
+            "test_data_row_variable": "profile1",
+            "code": "profile1 = Profile(first_name=\"John\", last_name=\"Doe\", bio=\"Bio of John Doe\", user_id=user1.id)"
+        },
+        {
+            "test_data_row_variable": "post1",
+            "code": "post1 = Post(title=\"First Post\", content=\"This is the first post content.\", user_id=user1.id)"
+        },
+        {
+            "test_data_row_variable": "comment1",
+            "code": "comment1 = Comment(content=\"Nice post!\", post_id=post1.id, user_id=user1.id)"
+        },
+        {
+            "test_data_row_variable": "like1",
+            "code": "like1 = Like(post_id=post1.id, user_id=user1.id)"
+        },
+        {
+            "test_data_row_variable": "follow1",
+            "code": "follow1 = Follow(follower_id=user1.id, followee_id=another_user.id)"
+        }
+    ],
+    "test_data_sqlite": "INSERT INTO `user` (username, email, password) VALUES ('user_one', 'user1@example.com', 'hashed_pw1');\nINSERT INTO `profile` (first_name, last_name, bio, user_id) VALUES ('John', 'Doe', 'Bio of John Doe', user1.id);\nINSERT INTO `post` (title, content, user_id) VALUES ('First Post', 'This is the first post content.', user1.id);\nINSERT INTO `comment` (content, post_id, user_id) VALUES ('Nice post!', post1.id, user1.id);\nINSERT INTO `like` (post_id, user_id) VALUES (post1.id, user1.id);\nINSERT INTO `follow` (follower_id, followee_id) VALUES (user1.id, another_user.id);",
+    "name": "Igram Stats System"
+}

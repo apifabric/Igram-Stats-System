@@ -1,0 +1,5 @@
+Igram stats
+Use LogicBank to: Aplikácia má slúžiť na zber a vyhodnocovanie údajov futbalového mužstva. Má byť vytvorené používateľské rozhranie pre zadávanie týchto údajov: štatistiky zápasov a štatistiky hráčov.
+
+.
+Create at least 12 tables (models)
