@@ -1,0 +1,94 @@
+{
+    "rules": [
+        {
+            "name": "User Password Constraint",
+            "description": "Ensure the user password is set and not empty.",
+            "use_case": "General",
+            "code": "Rule.constraint(validate=User,\n                as_condition=lambda row: row.password != '',\n                error_msg='Password must be set and non-empty')",
+            "error": null,
+            "status": "accepted",
+            "entity": "User",
+            "id": "01JJPJ578KNQQN9B3WZK8H6Z1F"
+        },
+        {
+            "name": "Profile-User Link Constraint",
+            "description": "Ensure there is a user associated with each profile entry.",
+            "use_case": "General",
+            "code": "Rule.constraint(validate=Profile,\n                as_condition=lambda row: row.user_id is not None,\n                error_msg='Each profile must be linked to a user')",
+            "error": null,
+            "status": "accepted",
+            "entity": "Profile",
+            "id": "01JJPJ578THK5QJPC1N7XZ428A"
+        },
+        {
+            "name": "Post Likes Count",
+            "description": "Track the number of likes for each post.",
+            "use_case": "General",
+            "code": "Rule.count(derive=Post.likes_count, as_count_of=Like)",
+            "error": null,
+            "status": "accepted",
+            "entity": "Post",
+            "id": "01JJPJ578WR0MTHBB1ABC5GBK7"
+        },
+        {
+            "name": "Comment User Constraint",
+            "description": "Ensure each comment must be associated with a user.",
+            "use_case": "General",
+            "code": "Rule.constraint(validate=Comment,\n    as_condition=lambda row: row.user_id is not None,\n    error_msg='A comment must be associated with a user')",
+            "error": null,
+            "status": "accepted",
+            "entity": "Comment",
+            "id": "01JJPJ578ZJCGPG01BRW3ABEDY"
+        }
+    ],
+    "models": [
+        {
+            "classname": "Log",
+            "code": "class Log(Base):  # type: ignore\n    \"\"\"\n    description: Log of system activities.\n    \"\"\"\n    __tablename__ = 'log'\n    _s_collection_name = 'Log'  # type: ignore\n\n    id = Column(Integer, primary_key=True)\n    entry = Column(Text)\n    created_at = Column(DateTime)"
+        },
+        {
+            "classname": "Profile",
+            "code": "class Profile(Base):  # type: ignore\n    \"\"\"\n    description: Profile details of the user including their biography.\n    \"\"\"\n    __tablename__ = 'profile'\n    _s_collection_name = 'Profile'  # type: ignore\n\n    id = Column(Integer, primary_key=True)\n    first_name = Column(String)\n    last_name = Column(String)\n    bio = Column(Text)\n    user_id = Column(ForeignKey('user.id'))\n\n    # parent relationships (access parent)\n    user : Mapped[\"User\"] = relationship(foreign_keys='[Profile.user_id]', back_populates=(\"ProfileList\"))\n\n    # child relationships (access children)\n    UserList : Mapped[List[\"User\"]] = relationship(foreign_keys='[User.profile_id]', back_populates=\"profile\")"
+        },
+        {
+            "classname": "Tag",
+            "code": "class Tag(Base):  # type: ignore\n    \"\"\"\n    description: Tags associated with posts.\n    \"\"\"\n    __tablename__ = 'tag'\n    _s_collection_name = 'Tag'  # type: ignore\n\n    id = Column(Integer, primary_key=True)\n    name = Column(String)\n\n    # parent relationships (access parent)\n\n    # child relationships (access children)\n    PostTagList : Mapped[List[\"PostTag\"]] = relationship(back_populates=\"tag\")"
+        },
+        {
+            "classname": "User",
+            "code": "class User(Base):  # type: ignore\n    \"\"\"\n    description: User information and authentication details.\n    \"\"\"\n    __tablename__ = 'user'\n    _s_collection_name = 'User'  # type: ignore\n\n    id = Column(Integer, primary_key=True)\n    username = Column(String, nullable=False)\n    email = Column(String, nullable=False)\n    password = Column(String, nullable=False)\n    profile_id = Column(ForeignKey('profile.id'))\n\n    # parent relationships (access parent)\n    profile : Mapped[\"Profile\"] = relationship(foreign_keys='[User.profile_id]', back_populates=(\"UserList\"))\n\n    # child relationships (access children)\n    ProfileList : Mapped[List[\"Profile\"]] = relationship(foreign_keys='[Profile.user_id]', back_populates=\"user\")\n    ActivityList : Mapped[List[\"Activity\"]] = relationship(back_populates=\"user\")\n    FollowList : Mapped[List[\"Follow\"]] = relationship(foreign_keys='[Follow.followee_id]', back_populates=\"followee\")\n    followerFollowList : Mapped[List[\"Follow\"]] = relationship(foreign_keys='[Follow.follower_id]', back_populates=\"follower\")\n    MessageList : Mapped[List[\"Message\"]] = relationship(foreign_keys='[Message.receiver_id]', back_populates=\"receiver\")\n    senderMessageList : Mapped[List[\"Message\"]] = relationship(foreign_keys='[Message.sender_id]', back_populates=\"sender\")\n    NotificationList : Mapped[List[\"Notification\"]] = relationship(back_populates=\"user\")\n    PostList : Mapped[List[\"Post\"]] = relationship(back_populates=\"user\")\n    CommentList : Mapped[List[\"Comment\"]] = relationship(back_populates=\"user\")\n    LikeList : Mapped[List[\"Like\"]] = relationship(back_populates=\"user\")"
+        },
+        {
+            "classname": "Activity",
+            "code": "class Activity(Base):  # type: ignore\n    \"\"\"\n    description: User activity records.\n    \"\"\"\n    __tablename__ = 'activity'\n    _s_collection_name = 'Activity'  # type: ignore\n\n    id = Column(Integer, primary_key=True)\n    description = Column(Text)\n    user_id = Column(ForeignKey('user.id'))\n\n    # parent relationships (access parent)\n    user : Mapped[\"User\"] = relationship(back_populates=(\"ActivityList\"))"
+        },
+        {
+            "classname": "Follow",
+            "code": "class Follow(Base):  # type: ignore\n    \"\"\"\n    description: Defines the follow relationship between users.\n    \"\"\"\n    __tablename__ = 'follow'\n    _s_collection_name = 'Follow'  # type: ignore\n\n    id = Column(Integer, primary_key=True)\n    follower_id = Column(ForeignKey('user.id'))\n    followee_id = Column(ForeignKey('user.id'))\n\n    # parent relationships (access parent)\n    followee : Mapped[\"User\"] = relationship(foreign_keys='[Follow.followee_id]', back_populates=(\"FollowList\"))\n    follower : Mapped[\"User\"] = relationship(foreign_keys='[Follow.follower_id]', back_populates=(\"followerFollowList\"))"
+        },
+        {
+            "classname": "Message",
+            "code": "class Message(Base):  # type: ignore\n    \"\"\"\n    description: Messages exchanged between users.\n    \"\"\"\n    __tablename__ = 'message'\n    _s_collection_name = 'Message'  # type: ignore\n\n    id = Column(Integer, primary_key=True)\n    content = Column(Text)\n    sender_id = Column(ForeignKey('user.id'))\n    receiver_id = Column(ForeignKey('user.id'))\n\n    # parent relationships (access parent)\n    receiver : Mapped[\"User\"] = relationship(foreign_keys='[Message.receiver_id]', back_populates=(\"MessageList\"))\n    sender : Mapped[\"User\"] = relationship(foreign_keys='[Message.sender_id]', back_populates=(\"senderMessageList\"))"
+        },
+        {
+            "classname": "Notification",
+            "code": "class Notification(Base):  # type: ignore\n    \"\"\"\n    description: Notifications sent to users.\n    \"\"\"\n    __tablename__ = 'notification'\n    _s_collection_name = 'Notification'  # type: ignore\n\n    id = Column(Integer, primary_key=True)\n    content = Column(Text)\n    user_id = Column(ForeignKey('user.id'))\n\n    # parent relationships (access parent)\n    user : Mapped[\"User\"] = relationship(back_populates=(\"NotificationList\"))"
+        },
+        {
+            "classname": "Post",
+            "code": "class Post(Base):  # type: ignore\n    \"\"\"\n    description: Details about user posts made on the platform.\n    \"\"\"\n    __tablename__ = 'post'\n    _s_collection_name = 'Post'  # type: ignore\n\n    id = Column(Integer, primary_key=True)\n    title = Column(String)\n    content = Column(Text)\n    user_id = Column(ForeignKey('user.id'))\n\n    # parent relationships (access parent)\n    user : Mapped[\"User\"] = relationship(back_populates=(\"PostList\"))\n\n    # child relationships (access children)\n    CommentList : Mapped[List[\"Comment\"]] = relationship(back_populates=\"post\")\n    LikeList : Mapped[List[\"Like\"]] = relationship(back_populates=\"post\")\n    PostTagList : Mapped[List[\"PostTag\"]] = relationship(back_populates=\"post\")"
+        },
+        {
+            "classname": "Comment",
+            "code": "class Comment(Base):  # type: ignore\n    \"\"\"\n    description: Comments made by users on posts.\n    \"\"\"\n    __tablename__ = 'comment'\n    _s_collection_name = 'Comment'  # type: ignore\n\n    id = Column(Integer, primary_key=True)\n    content = Column(Text)\n    post_id = Column(ForeignKey('post.id'))\n    user_id = Column(ForeignKey('user.id'))\n\n    # parent relationships (access parent)\n    post : Mapped[\"Post\"] = relationship(back_populates=(\"CommentList\"))\n    user : Mapped[\"User\"] = relationship(back_populates=(\"CommentList\"))"
+        },
+        {
+            "classname": "Like",
+            "code": "class Like(Base):  # type: ignore\n    \"\"\"\n    description: Likes made by users on posts.\n    \"\"\"\n    __tablename__ = 'like'\n    _s_collection_name = 'Like'  # type: ignore\n\n    id = Column(Integer, primary_key=True)\n    post_id = Column(ForeignKey('post.id'))\n    user_id = Column(ForeignKey('user.id'))\n\n    # parent relationships (access parent)\n    post : Mapped[\"Post\"] = relationship(back_populates=(\"LikeList\"))\n    user : Mapped[\"User\"] = relationship(back_populates=(\"LikeList\"))"
+        },
+        {
+            "classname": "PostTag",
+            "code": "class PostTag(Base):  # type: ignore\n    \"\"\"\n    description: Associative entity for the post-to-tag relationship.\n    \"\"\"\n    __tablename__ = 'post_tag'\n    _s_collection_name = 'PostTag'  # type: ignore\n\n    id = Column(Integer, primary_key=True)\n    post_id = Column(ForeignKey('post.id'))\n    tag_id = Column(ForeignKey('tag.id'))\n\n    # parent relationships (access parent)\n    post : Mapped[\"Post\"] = relationship(back_populates=(\"PostTagList\"))\n    tag : Mapped[\"Tag\"] = relationship(back_populates=(\"PostTagList\"))"
+        }
+    ]
+}
