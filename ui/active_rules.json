@@ -5,7 +5,7 @@
         "use_case": "General",
         "code": "Rule.constraint(validate=User,\n                as_condition=lambda row: row.password != '',\n                error_msg='Password must be set and non-empty')",
         "error": null,
-        "status": "accepted",
+        "status": "active",
         "entity": "User",
         "id": "01JJPJ578KNQQN9B3WZK8H6Z1F"
     },
@@ -15,7 +15,7 @@
         "use_case": "General",
         "code": "Rule.constraint(validate=Profile,\n                as_condition=lambda row: row.user_id is not None,\n                error_msg='Each profile must be linked to a user')",
         "error": null,
-        "status": "accepted",
+        "status": "active",
         "entity": "Profile",
         "id": "01JJPJ578THK5QJPC1N7XZ428A"
     },
@@ -24,7 +24,7 @@
         "description": "Track the number of likes for each post.",
         "use_case": "General",
         "code": "Rule.count(derive=Post.likes_count, as_count_of=Like)",
-        "error": null,
+        "error": "AttributeError: type object 'Post' has no attribute 'likes_count'",
         "status": "accepted",
         "entity": "Post",
         "id": "01JJPJ578WR0MTHBB1ABC5GBK7"
@@ -35,7 +35,7 @@
         "use_case": "General",
         "code": "Rule.constraint(validate=Comment,\n    as_condition=lambda row: row.user_id is not None,\n    error_msg='A comment must be associated with a user')",
         "error": null,
-        "status": "accepted",
+        "status": "active",
         "entity": "Comment",
         "id": "01JJPJ578ZJCGPG01BRW3ABEDY"
     }
